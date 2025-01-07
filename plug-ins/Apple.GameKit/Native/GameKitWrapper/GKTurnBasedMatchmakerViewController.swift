@@ -8,75 +8,65 @@
 import Foundation
 import GameKit
 
-@_cdecl("GKTurnBasedMatchmakerViewController_Free")
-public func GKTurnBasedMatchmakerViewController_Free
-(
-    pointer: UnsafeMutableRawPointer
-)
-{
-    _ = Unmanaged<GKTurnBasedMatchmakerViewController>.fromOpaque(pointer).autorelease();
-}
-
 @_cdecl("GKTurnBasedMatchmakerViewController_InitWithMatchRequest")
 public func GKTurnBasedMatchmakerViewController_InitWithMatchRequest
 (
-    pointer: UnsafeMutableRawPointer
-) -> UnsafeMutableRawPointer
+    pointer: UnsafeMutablePointer<GKMatchRequest>
+) -> UnsafeMutablePointer<GKTurnBasedMatchmakerViewController>
 {
-    let matchRequest = Unmanaged<GKMatchRequest>.fromOpaque(pointer).takeUnretainedValue();
+    let matchRequest = pointer.takeUnretainedValue();
     let instance = GKTurnBasedMatchmakerViewController.init(matchRequest: matchRequest);
     
-    return Unmanaged.passRetained(instance).toOpaque();
+    return instance.passRetainedUnsafeMutablePointer();
 }
 
 @_cdecl("GKTurnBasedMatchmakerViewController_GetShowExistingMatches")
 public func GKTurnBasedMatchmakerViewController_GetShowExistingMatches
 (
-    pointer: UnsafeMutableRawPointer
+    pointer: UnsafeMutablePointer<GKTurnBasedMatchmakerViewController>
 ) -> Bool
 {
-    let target = Unmanaged<GKTurnBasedMatchmakerViewController>.fromOpaque(pointer).takeUnretainedValue();
+    let target = pointer.takeUnretainedValue();
     return target.showExistingMatches;
 }
 
 @_cdecl("GKTurnBasedMatchmakerViewController_SetShowExistingMatches")
 public func GKTurnBasedMatchmakerViewController_SetShowExistingMatches
 (
-    pointer: UnsafeMutableRawPointer,
+    pointer: UnsafeMutablePointer<GKTurnBasedMatchmakerViewController>,
     value: Bool
 )
 {
-    let target = Unmanaged<GKTurnBasedMatchmakerViewController>.fromOpaque(pointer).takeUnretainedValue();
+    let target = pointer.takeUnretainedValue();
     target.showExistingMatches = value;
 }
 
 @_cdecl("GKTurnBasedMatchmakerViewController_GetMatchmakingMode")
 public func GKTurnBasedMatchmakerViewController_GetMatchmakingMode
 (
-    pointer: UnsafeMutableRawPointer
+    pointer: UnsafeMutablePointer<GKTurnBasedMatchmakerViewController>
 ) -> Int
 {
-    let target = Unmanaged<GKTurnBasedMatchmakerViewController>.fromOpaque(pointer).takeUnretainedValue();
-    
     if #available(iOS 15, tvOS 15, macOS 12, *) {
+        let target = pointer.takeUnretainedValue();
         return target.matchmakingMode.rawValue
     } else {
-        return 0;
-        
-    };
+        DefaultNSErrorHandler.throwApiUnavailableError();
+    }
 }
 
 @_cdecl("GKTurnBasedMatchmakerViewController_SetMatchmakingMode")
 public func GKTurnBasedMatchmakerViewController_SetMatchmakingMode
 (
-    pointer: UnsafeMutableRawPointer,
+    pointer: UnsafeMutablePointer<GKTurnBasedMatchmakerViewController>,
     value: Int
 )
 {
-    let target = Unmanaged<GKTurnBasedMatchmakerViewController>.fromOpaque(pointer).takeUnretainedValue();
-    
     if #available(iOS 15, tvOS 15, macOS 12, *) {
+        let target = pointer.takeUnretainedValue();
         target.matchmakingMode = GKMatchmakingMode.init(rawValue: value)!;
+    } else {
+        DefaultNSErrorHandler.throwApiUnavailableError();
     }
 }
 
@@ -85,17 +75,17 @@ public var _activeTurnBasedMatchmakerDelegate : GKWTurnBasedMatchmakerViewContro
 @_cdecl("GKTurnBasedMatchmakerViewController_GetMatchmakerDelegate")
 public func GKTurnBasedMatchmakerViewController_GetMatchmakerDelegate
 (
-    pointer: UnsafeMutableRawPointer
-) -> UnsafeMutableRawPointer
+    pointer: UnsafeMutablePointer<GKTurnBasedMatchmakerViewController>
+) -> UnsafeMutablePointer<GKWTurnBasedMatchmakerViewControllerDelegate>
 {
-    let target = Unmanaged<GKTurnBasedMatchmakerViewController>.fromOpaque(pointer).takeUnretainedValue();
-    
-    if(target.turnBasedMatchmakerDelegate == nil) {
+    let target = pointer.takeUnretainedValue();
+
+    if (target.turnBasedMatchmakerDelegate == nil) {
         _activeTurnBasedMatchmakerDelegate = GKWTurnBasedMatchmakerViewControllerDelegate();
         target.turnBasedMatchmakerDelegate = _activeTurnBasedMatchmakerDelegate;
     }
-    
-    return Unmanaged.passRetained(target.turnBasedMatchmakerDelegate!).toOpaque();
+
+    return _activeTurnBasedMatchmakerDelegate!.passRetainedUnsafeMutablePointer();
 }
 
 public var _presentingTurnBasedMatchmakerViewController : GKTurnBasedMatchmakerViewController? = nil;
@@ -103,32 +93,21 @@ public var _presentingTurnBasedMatchmakerViewController : GKTurnBasedMatchmakerV
 @_cdecl("GKTurnBasedMatchmakerViewController_Present")
 public func GKTurnBasedMatchmakerViewController_Present
 (
-    pointer: UnsafeMutableRawPointer
+    pointer: UnsafeMutablePointer<GKTurnBasedMatchmakerViewController>
 )
 {
-    let target = Unmanaged<GKTurnBasedMatchmakerViewController>.fromOpaque(pointer).takeUnretainedValue();
+    let target = pointer.takeUnretainedValue();
     _presentingTurnBasedMatchmakerViewController = target;
-    
-#if os(iOS) || os(tvOS)
-    let viewController = UIApplication.shared.windows.first!.rootViewController;
-    viewController?.present(target, animated: true);
-#else
-    GKDialogController.shared().parentWindow = NSApplication.shared.keyWindow;
-    GKDialogController.shared().present(target);
-#endif
+    UiUtilities.presentViewController(viewController: target)
 }
 
+@_cdecl("GKTurnBasedMatchmakerViewController_Dismiss")
 public func GKTurnBasedMatchmakerViewController_Dismiss
 (
     viewController: GKTurnBasedMatchmakerViewController
 )
 {
-    #if os(iOS) || os(tvOS)
-        viewController.dismiss(animated: true);
-    #else
-        GKDialogController.shared().dismiss(viewController);
-    #endif
-    
+    UiUtilities.dismissViewController(viewController: viewController)
     _presentingTurnBasedMatchmakerViewController = nil;
     _activeTurnBasedMatchmakerDelegate = nil;
 }
