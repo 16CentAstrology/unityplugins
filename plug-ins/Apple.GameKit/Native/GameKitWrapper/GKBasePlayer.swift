@@ -8,21 +8,12 @@
 import Foundation
 import GameKit
 
-@_cdecl("GKBasePlayer_Free")
-public func GKBasePlayer_Free
-(
-    pointer : UnsafeMutableRawPointer
-)
-{
-    _ = Unmanaged<GKBasePlayer>.fromOpaque(pointer).autorelease();
-}
-
 @_cdecl("GKBasePlayer_GetDisplayName")
 public func GKBasePlayer_GetDisplayName
 (
-    pointer : UnsafeMutableRawPointer
+    pointer : UnsafeMutablePointer<GKBasePlayer>
 ) -> char_p?
 {
-    let player = Unmanaged<GKBasePlayer>.fromOpaque(pointer).takeUnretainedValue();
+    let player = pointer.takeUnretainedValue();
     return player.displayName?.toCharPCopy();
 }
